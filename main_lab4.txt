@@ -1,0 +1,104 @@
+/*
+Title: UART Driver
+Description: Main function for LED toggle functionality
+Authors: Susan Margevich
+Date: 2/6/2019
+
+Some of the contents are obtained by the courtesy of the material provided by Freescale Semiconductor, Inc.
+Copyright (c) 2014, Freescale Semiconductor, Inc.
+All rights reserved.
+*/
+
+#include<stdio.h>
+#include "MK64F12.h"
+#define BAUD_RATE 9600      //default baud rate 
+#define SYS_CLOCK 20485760 //default system clock (see DEFAULT_SYSTEM_CLOCK  in system_MK64F12.c)
+#define CHAR_COUNT 25      //change this to modify the max. permissible length of a sentence
+#define BUS_CLOCK 120000000 // 60 MHz bus clock
+
+
+//uart3
+void put3(char *ptr_str);
+void uart_init3(void);
+uint8_t uart_getchar3(void);
+void uart_putchar3(char ch);
+
+void LED_Init3(void){
+	
+	// ports & pins
+	// Red LED: PTB22 (port B, pin 22)
+	// Green LED: PTE26 (port E, pin 26)
+	// Blue LED: PTB21 (port B, pin 21)
+	
+	// Enable clocks on Ports B and E for LED timing
+	
+	// Port B
+	SIM_SCGC5 |= SIM_SCGC5_PORTB_MASK;
+	//Port E
+	SIM_SCGC5 |= SIM_SCGC5_PORTE_MASK;
+	
+	// Configure the Signal Multiplexer for GPIO
+	
+	// Red
+	PORTB_PCR22 = PORT_PCR_MUX(1); 
+	// Green
+	PORTE_PCR26 = PORT_PCR_MUX(1); 
+	// Blue
+	PORTB_PCR21 = PORT_PCR_MUX(1); 
+	
+	// Switch the GPIO pins to output mode
+	GPIOB_PDDR = (1 << 21) | (1 << 22);
+	GPIOE_PDDR = (1 << 26);
+
+	// Turn off the LEDs
+	GPIOB_PDOR = 1;
+	GPIOE_PDOR = 1;
+}
+
+int main()
+{
+	uart_init3();
+	LED_Init3();
+	
+	for(;;){
+	
+		switch(uart_getchar3())
+			{
+			case '1':
+				// turn LED red
+				GPIOB_PCOR = (1UL << 22);
+				GPIOE_PSOR = (1UL << 26);
+				GPIOB_PSOR = (1UL << 21);
+			break;
+			
+			case '2':
+				// turn LED blue
+				GPIOB_PSOR = (1UL << 22);
+				GPIOE_PSOR = (1UL << 26);
+				GPIOB_PCOR = (1UL << 21);
+			break;
+
+			case '3':
+				// turn LED green
+				GPIOB_PSOR = (1UL << 22);
+				GPIOE_PCOR = (1UL << 26);
+				GPIOB_PSOR = (1UL << 21);
+			break;
+
+			case '0':
+				// turn LED off
+				GPIOB_PSOR = (1UL << 22);
+				GPIOE_PSOR = (1UL << 26);
+				GPIOB_PSOR = (1UL << 21);
+			break;
+		}
+	}
+
+		
+}  
+
+void put3(char *ptr_str)
+{
+	while(*ptr_str)
+		uart_putchar3(*ptr_str++);
+}

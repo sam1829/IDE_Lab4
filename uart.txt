@@ -1,0 +1,14 @@
+/*
+ * File:        uart.h
+ * Purpose:     Macro definitions for uart3.c
+ */
+
+void uart_put3(char *ptr_str);
+void uart_init3(void);
+uint8_t uart_getchar3(void);
+void uart_putchar3(char ch);
+
+void uart_put(char *ptr_str);
+void uart_init(void);
+uint8_t uart_getchar(void);
+void uart_putchar(char ch);
